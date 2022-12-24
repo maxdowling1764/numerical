@@ -44,7 +44,7 @@ def rk4_order2(f, g, t, x, dxdt, dt = 0.001):
 
     return (t + dt, x + (1.0/6.0) * (k1 + 2*k2 + 2*k3 + k4), dxdt + (1.0/6.0) * (l1 + 2*l2 + 2*l3 + l4))
 
-def rk4_order_n(f_n, t, x_derivs, dt = 0.001):
+def rk4_order_n(f_n, t, x_derivs, dt = 0.01):
     # Offsets will be our generalization of k and l used in rk4_order2
     # Each offset vector is indexed by [i, j]
     # i is RK order, j is the index of the function in f_n used to compute the offset 
@@ -55,39 +55,3 @@ def rk4_order_n(f_n, t, x_derivs, dt = 0.001):
     offsets[3] = dt * np.array([f(t + dt, x_derivs + offsets[2]) for f in f_n])
     #print(offsets)
     return (t + dt, x_derivs + (1.0/6.0) * (offsets[0] + 2*offsets[1] + 2*offsets[2] + offsets[3]))
-
-# pos, vel - 3 vector (position and velocity)
-# charge - signed scalar
-# e_field, b_field - 3 dimensional vector field (electric and magnetic respectively) 
-def lorentz(pos, vel, charge, e_field, b_field):
-    return charge*e_field(pos) + charge*(np.cross(vel, b_field(pos)))
- 
-def accel(m, F):
-    return (1.0/m)*F
-
-def sim_loop():
-    fig, ax = plt.subplots()
-    t_series = [0.0]
-    i_series = [0.0]
-    t = 0.0
-    x_derivs = np.array([[0], [0]])
-
-    V0 = 120.0
-    w = 376.99
-    L = 5.0
-    C = 0.01
-    R = 100.0
-
-    ddydx = lambda t, x_derivs: (V0*w/L)*np.cos(w*t) - (R*x_derivs[1]/L) - (x_derivs[0]/C)
-    dydx = lambda t, x_derivs: x_derivs[1]
-    
-    for i in range(0, 1000):
-        t, x_derivs = rk4_order_n([dydx, ddydx], t, x_derivs)
-        t_series.append(t)
-        i_series.append(x_derivs[0,0])
-
-    ax.plot(t_series, i_series)
-    plt.show()
-
-
-sim_loop()
