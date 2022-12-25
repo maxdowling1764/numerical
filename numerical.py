@@ -1,6 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def generate_sine(V_source, w_source, phi_source):
+    return lambda t: V_source*np.sin(w_source*t + phi_source)
+
+def generate_deriv_sine(V_source, w_source, phi_source):
+    return lambda t: V_source*w_source*np.cos(w_source*t + phi_source)
+
 # Gauss-Seidel Method
 # 
 # @param A $n \times n$ invertible, diagonally dominant coeff matrix
