@@ -44,14 +44,16 @@ def rk4_order2(f, g, t, x, dxdt, dt = 0.001):
 
     return (t + dt, x + (1.0/6.0) * (k1 + 2*k2 + 2*k3 + k4), dxdt + (1.0/6.0) * (l1 + 2*l2 + 2*l3 + l4))
 
-def rk4_order_n(f_n, t, x_derivs, dt = 0.01):
+def rk4_order_n(f_n, t, state, dt = 0.01):
     # Offsets will be our generalization of k and l used in rk4_order2
     # Each offset vector is indexed by [i, j]
     # i is RK order, j is the index of the function in f_n used to compute the offset 
-    offsets = np.zeros((4, len(f_n), x_derivs.shape[1]))
-    offsets[0] = dt * np.array([f(t, x_derivs) for f in f_n])
-    offsets[1] = dt * np.array([f(t + 0.5*dt, x_derivs + 0.5*offsets[0]) for f in f_n])
-    offsets[2] = dt * np.array([f(t + 0.5*dt, x_derivs + 0.5*offsets[1]) for f in f_n])
-    offsets[3] = dt * np.array([f(t + dt, x_derivs + offsets[2]) for f in f_n])
+    offsets = np.zeros(tuple([4]) + state.shape)
+
+    #print(dt * np.array([f(t, x_derivs) for f in f_n]))
+    offsets[0] = dt * np.array([f(t, state) for f in f_n])
+    offsets[1] = dt * np.array([f(t + 0.5*dt, state + 0.5*offsets[0]) for f in f_n])
+    offsets[2] = dt * np.array([f(t + 0.5*dt, state + 0.5*offsets[1]) for f in f_n])
+    offsets[3] = dt * np.array([f(t + dt, state + offsets[2]) for f in f_n])
     #print(offsets)
-    return (t + dt, x_derivs + (1.0/6.0) * (offsets[0] + 2*offsets[1] + 2*offsets[2] + offsets[3]))
+    return (t + dt, state + (1.0/6.0) * (offsets[0] + 2*offsets[1] + 2*offsets[2] + offsets[3]))

@@ -1,5 +1,5 @@
 import numpy as np
-from Simulation import Simulation
+from simulations.Simulation import Simulation
 
 def lorenz_transfer(t, state, sigma, rho, beta):
     return np.array([sigma*(state[0,1] - state[0,0]), state[0,0]*(rho - state[0,2]) - state[0,1], state[0,0]*state[0,1] - beta*state[0,2]])

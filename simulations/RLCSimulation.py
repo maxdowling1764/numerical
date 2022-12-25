@@ -1,5 +1,5 @@
 import numpy as np
-from Simulation import Simulation
+from simulations.Simulation import Simulation
 
 def rlc_transfer(V0, w, R, L, C):
     def transfer(t, state):
