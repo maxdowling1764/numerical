@@ -63,3 +63,10 @@ def rk4_order_n(f_n, t, state, dt = 0.01):
     offsets[3] = dt * np.array([f(t + dt, state + offsets[2]) for f in f_n])
     #print(offsets)
     return (t + dt, state + (1.0/6.0) * (offsets[0] + 2*offsets[1] + 2*offsets[2] + offsets[3]))
+
+def crank_nicolson(u0, c, dt):
+    A = np.zeros((u0.shape[0], u0.shape[0]))
+    
+    diagonals = []
+    diagonals = [np.array([c[i]]*(u0.shape[0] - abs(2*i - c.shape[0]+1))) for i in range(c.shape[0])]
+    
