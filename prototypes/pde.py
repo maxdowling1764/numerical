@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.sparse import diags
 import matplotlib.pyplot as plt
+from matplotlib import colors
+from matplotlib import cm
 
 def cidx_to_offset(cidx, n_coeffs):
     return int(cidx - (n_coeffs - 1)/2)
@@ -73,7 +75,7 @@ def solve_diffusion_2d(t0, U0, U0_last, alpha, dt, ds, L):
     fig, ax = plt.subplots()
     n = int(L/ds)
     x, y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, n))
-    U = np.random.rand(n,n)*500
+    U = np.random.rand(n,n)*10
     U_last = U
     heatmap = ax.pcolormesh(x, y, U)
     sigma_x = alpha * dt/ds**2
@@ -91,7 +93,7 @@ def solve_diffusion_2d(t0, U0, U0_last, alpha, dt, ds, L):
     while True:
         tmp = np.copy(u_flat)
         
-        u_flat = np.dot(Ainv, np.dot(B, u_flat) + u_last_flat)
+        u_flat = np.dot(Ainv, np.dot(B, u_flat) + (u_last_flat + u_flat)/2.0)
         u_last_flat = tmp
         U = u_flat.reshape((n,n))
         t += dt
@@ -102,11 +104,12 @@ def solve_diffusion_2d(t0, U0, U0_last, alpha, dt, ds, L):
 
 def solve_wave_2d(x, y, t0, U0, U0_last, c, dt, ds, L):
     plt.ion()
+    colormap = cm.get_cmap("PuRd")
     fig, ax = plt.subplots()
     n = int(L/ds)
     U = U0
     U_last = U0_last
-    heatmap = ax.pcolormesh(x, y, U)
+    heatmap = ax.pcolormesh(x, y, U, cmap=colormap)
     sigma_x = (c*dt/ds)**2/2
     sigma_y = sigma_x
     t = t0
@@ -136,22 +139,27 @@ def solve_r_diffusion_2d(x, y, t0, U0, U0_last, c, dt, ds, L):
     n = int(L/ds)
     U = U0
     U_last = U0_last
-    heatmap = ax.pcolormesh(x, y, U)
-    sigma_x = 1.0/(2.0*ds**2.0)
+    colormap = cm.get_cmap("plasma")
+    heatmap = ax.pcolormesh(x, y, U, cmap=colormap)
+    sigma_x = dt/(2.0*ds**2.0)
     sigma_y = sigma_x
     sigma_t = 1.0/(2.0*dt)
+    beta = 4.0
     t = t0
-    A = create_diagonals_2d(np.array([-sigma_x] + [0]*(n-2) + [-sigma_y, 2.0*(sigma_x+sigma_y)+sigma_t, -sigma_y] + [0]*(n-2) + [-sigma_x]), n, n)
-    B = create_diagonals_2d(np.array([sigma_x] + [0]*(n-2) + [sigma_y, 1-2.0*(sigma_x+sigma_y), sigma_y] + [0]*(n-2) + [sigma_x]), n, n)
+    A = create_diagonals_2d(np.array([-sigma_x] + [0]*(n-2) + [-sigma_y, 1.0 + 2.0*(sigma_x+sigma_y), -sigma_y] + [0]*(n-2) + [-sigma_x]), n, n)
+    B = create_diagonals_2d(np.array([sigma_x] + [0]*(n-2) + [sigma_y, -2.0*(sigma_x+sigma_y), sigma_y] + [0]*(n-2) + [sigma_x]), n, n)
         
     u_flat = np.ndarray.flatten(U)
     u_last_flat = np.ndarray.flatten(U)
     # TODO: use solve banded to find inverse
     Ainv = np.linalg.inv(A)
-
+    activation = lambda x: x*(1.0-x)*np.exp(-beta*(1.0-x))
+    
+    alpha = 10.0
+    mu = 0.5
     while True:
         tmp = np.copy(u_flat)
-        rhs = np.dot(B, u_flat) + sigma_t*u_last_flat + ((u_flat+u_last_flat)/2.0)*(1.0- (u_flat+u_last_flat)/2)
+        rhs = np.dot(B, (u_flat + u_last_flat)/2.0) + (u_last_flat + u_flat)/2.0 + alpha*(activation(u_flat) + activation(u_last_flat))/2.0
         u_flat = np.dot(Ainv, rhs)
         u_last_flat = tmp
         U = u_flat.reshape((n,n))
@@ -187,12 +195,14 @@ def solve_wave_dirichlet(t0, U0_last, U0_curr, c, dt, ds, L):
 
 
 alpha = 1.0
-dt = 0.001
+dt = 0.0001
 L = 1.0
-ds = 0.0125
+ds = 0.025
 n = int(L/ds)
+R = 1.0
+w = 1.0
 x, y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, n))
-U0_last = sum([np.random.rand(1)*np.sin(x*2*np.pi*k)*np.sin(y*2*np.pi*k) for k in range(0, 4)])
-U0 = sum([np.random.rand(1)*np.sin(x*2*np.pi*k)*np.sin(y*2*np.pi*k) for k in range(4, 6)])
+U0_last = np.random.rand(n,n)
+U0 = np.random.rand(n,n)
 
-solve_wave_2d(x, y, 0.0, U0, U0_last, 3.0, dt, ds, L)
+solve_r_diffusion_2d(x, y, 0.0, U0, U0_last, 1.0, dt, ds, L)
