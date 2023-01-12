@@ -144,7 +144,7 @@ def solve_r_diffusion_2d(x, y, t0, U0, U0_last, c, dt, ds, L):
     sigma_x = dt/(2.0*ds**2.0)
     sigma_y = sigma_x
     sigma_t = 1.0/(2.0*dt)
-    beta = 4.0
+    beta = 12.0
     t = t0
     A = create_diagonals_2d(np.array([-sigma_x] + [0]*(n-2) + [-sigma_y, 1.0 + 2.0*(sigma_x+sigma_y), -sigma_y] + [0]*(n-2) + [-sigma_x]), n, n)
     B = create_diagonals_2d(np.array([sigma_x] + [0]*(n-2) + [sigma_y, -2.0*(sigma_x+sigma_y), sigma_y] + [0]*(n-2) + [sigma_x]), n, n)
@@ -155,11 +155,11 @@ def solve_r_diffusion_2d(x, y, t0, U0, U0_last, c, dt, ds, L):
     Ainv = np.linalg.inv(A)
     activation = lambda x: x*(1.0-x)*np.exp(-beta*(1.0-x))
     
-    alpha = 10.0
-    mu = 0.5
+    alpha = 5.0
+    mu = 0.0
     while True:
         tmp = np.copy(u_flat)
-        rhs = np.dot(B, (u_flat + u_last_flat)/2.0) + (u_last_flat + u_flat)/2.0 + alpha*(activation(u_flat) + activation(u_last_flat))/2.0
+        rhs = np.dot(B, (u_flat + u_last_flat)/2.0) + (u_last_flat + u_flat)/2.0 + alpha*(activation(u_flat) + activation(u_last_flat))/2.0 + mu
         u_flat = np.dot(Ainv, rhs)
         u_last_flat = tmp
         U = u_flat.reshape((n,n))
@@ -195,11 +195,11 @@ def solve_wave_dirichlet(t0, U0_last, U0_curr, c, dt, ds, L):
 
 
 alpha = 1.0
-dt = 0.0001
+dt = 0.00001
 L = 1.0
 ds = 0.025
 n = int(L/ds)
-R = 1.0
+R = 2.0
 w = 1.0
 x, y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, n))
 U0_last = np.random.rand(n,n)
