@@ -1,4 +1,4 @@
-from simulations.LorenzSimulation import LorenzSimulation
+from simulations.Lorenz import Lorenz
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,7 +13,7 @@ def main():
     l1, = ax.plot3D(x_series, y_series, z_series, 'blue')
     
     initial_state = np.random.rand(1,3)*20
-    sim = LorenzSimulation(initial_state, 10.0, 28.0, 8.0/3.0,delta_t=0.01)
+    sim = Lorenz(initial_state, 10.0, 28.0, 8.0/3.0,delta_t=0.01)
     print(sim.start())
 
     while(sim.running):

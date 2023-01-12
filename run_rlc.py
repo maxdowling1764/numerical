@@ -1,4 +1,4 @@
-from simulations.NodalRLCSimulation import NodalRLCSimulation
+from simulations.NodalRLC import NodalRLC
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -25,7 +25,7 @@ def main():
     l1, = ax.plot3D(x_series, y_series, z_series, 'blue')
     
     initial_state = np.zeros(2,2,2)
-    sim = NodalRLCSimulation(initial_state, )
+    sim = NodalRLC(initial_state, )
     print(sim.start())
 
     while(sim.running):
