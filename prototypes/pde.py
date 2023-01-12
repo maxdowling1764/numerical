@@ -154,9 +154,8 @@ def solve_r_diffusion_2d(x, y, t0, U0, U0_last, c, dt, ds, L):
     # TODO: use solve banded to find inverse
     Ainv = np.linalg.inv(A)
     activation = lambda x: x*(1.0-x)*np.exp(-beta*(1.0-x))
-    
-    alpha = 5.0
-    mu = 0.0
+    alpha = 4.0
+    mu = 0.125
     while True:
         tmp = np.copy(u_flat)
         rhs = np.dot(B, (u_flat + u_last_flat)/2.0) + (u_last_flat + u_flat)/2.0 + alpha*(activation(u_flat) + activation(u_last_flat))/2.0 + mu

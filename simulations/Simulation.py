@@ -4,6 +4,7 @@ import threading
 
 class Simulation:
     def __init__(self, initial_state, transfer, t0=0.0, dt=0.001):
+
         self.past_states = [initial_state]
         self.t_series = [t0]
         self.curr_state = initial_state
